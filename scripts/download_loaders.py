@@ -53,9 +53,13 @@ except:
 
 session = requests.Session()
 
+VERSION_URL_BASE = "https://eve-china-version-files.oss-cn-hangzhou.aliyuncs.com"
+BINARIES_URL_BASE = "https://ma79.gdl.netease.com/eve/binaries"
+RESOURCES_URL_BASE = "https://ma79.gdl.netease.com/eve/resources"
+
 if len(sys.argv) == 1:
     # Find the latest installer listing.
-    latest = session.get("https://binaries.eveonline.com/eveclient_TQ.json").json()
+    latest = session.get(f"{VERSION_URL_BASE}/eveclient_INFINITY.json").json()
     build = latest["build"]
     world = "tranquility"
 else:
@@ -67,7 +71,7 @@ print("Downloading files for build " + build + " ...")
 with open("data/build-number.txt", "w") as f:
     f.write(world + "-" + build)
 
-installer = session.get("https://binaries.eveonline.com/eveonline_" + build + ".txt").text
+installer = session.get(f"{VERSION_URL_BASE}/eveonline_" + build + ".txt").text
 
 # Download all the loaders.
 resfileindex = None
@@ -90,13 +94,13 @@ for line in installer.split("\n"):
     print("Downloading " + local_path + " ...")
 
     with open(local_path, "wb") as f:
-        f.write(session.get("https://binaries.eveonline.com/" + path).content)
+        f.write(session.get(f"{BINARIES_URL_BASE}/" + path).content)
 
 if resfileindex is None:
     raise Exception("resfileindex not found")
 
 # Download all the fsdbinary files.
-resfile = requests.get("https://binaries.eveonline.com/" + resfileindex).text
+resfile = requests.get(f"{BINARIES_URL_BASE}/" + resfileindex).text
 for line in resfile.split("\n"):
     if not line:
         continue
@@ -124,4 +128,4 @@ for line in resfile.split("\n"):
     print("Downloading " + local_path + " ...")
 
     with open(local_path, "wb") as f:
-        f.write(session.get("https://resources.eveonline.com/" + path).content)
+        f.write(session.get(f"{RESOURCES_URL_BASE}/" + path).content)

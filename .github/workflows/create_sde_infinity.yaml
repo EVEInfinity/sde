@@ -1,10 +1,10 @@
-name: Create SDE (SISI)
+name: Create SDE (INFINITY)
 
 on:
   workflow_dispatch:
     inputs:
       build-number:
-        description: 'Singularity - Build number'
+        description: 'INFINITY - Build number'
         required: false
   schedule:
   - cron: '15 * * * *'
@@ -29,7 +29,7 @@ jobs:
         if [ -n "${{ github.event.inputs.build-number }}" ]; then
           BUILD_NUMBER=${{ github.event.inputs.build-number }}
         else
-          BUILD_NUMBER=$(curl -s https://binaries.eveonline.com/eveclient_SISI.json | jq -r '.build')
+          BUILD_NUMBER=$(curl -s https://eve-china-version-files.oss-cn-hangzhou.aliyuncs.com/eveclient_INFINITY.json | jq -r '.build')
         fi
 
         echo "Build number: ${BUILD_NUMBER}"
@@ -38,7 +38,7 @@ jobs:
     - name: Check for existing tag
       id: check-tag
       run: |
-        TAG_NAME="sde-singularity-${{ steps.get-build-number.outputs.build-number }}"
+        TAG_NAME="sde-infinity-${{ steps.get-build-number.outputs.build-number }}"
         REF_NAME=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG_NAME} | jq -r '.ref')
 
         echo "Tag name: ${TAG_NAME}"
@@ -70,9 +70,15 @@ jobs:
         C:\Python27\python.exe -m pip install --upgrade pip
         C:\Python27\python.exe -m pip install requests
 
+    - name: Install Python3
+      run: |
+        choco install python3
+        C:\Python\python.exe -m pip install --upgrade pip
+        C:\Python\python.exe -m pip install requests
+
     - name: Download loaders
       run: |
-        C:\Python27\python.exe scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} singularity
+        C:\Python\python.exe scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} infinity
 
     - name: Execute loaders
       run: |
@@ -107,25 +113,14 @@ jobs:
 
     - name: Download latest SDE
       run: |
-        SDE_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${GITHUB_REPOSITORY}/releases | jq -r '.[].tag_name' | grep "tranquility" | head -n 1)
-        URL_SDE=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${SDE_VERSION} | jq -r '.assets[] | select(.name == "'${SDE_VERSION}'.tar.xz") | .url')
+        SDE_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${GITHUB_REPOSITORY}/releases | jq -r '.[].tag_name' | grep "infinity" | head -n 1)
+        URL_SDE=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest | jq -r '.assets[] | select(.name == "'${SDE_VERSION}'.tar.xz") | .url')
 
         echo "Latest SDE: ${SDE_VERSION}"
         echo "URL SDE: ${URL_SDE}"
 
         curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/octet-stream" -L -s ${URL_SDE} -o ${SDE_VERSION}.tar.xz
         tar Jxf ${SDE_VERSION}.tar.xz
-        # Conversion from old (pre 2024-06-11) SDE to new.
-        if [ -e "sde/fsd" ]; then
-          mv sde/fsd/* sde/
-          (
-            cd sde
-            mv categoryIDs.yaml categories.yaml
-            mv groupIDs.yaml groups.yaml
-            mv typeIDs.yaml types.yaml
-          )
-          rm -rf sde/fsd
-        fi
         mv sde sde-latest
 
         rm ${SDE_VERSION}.tar.xz
@@ -173,8 +168,8 @@ jobs:
     - name: Tag (no delta)
       if: steps.delta.outputs.has-delta == 'false'
       run: |
-        git tag sde-singularity-${{ needs.build-number.outputs.build-number }}
-        git push origin sde-singularity-${{ needs.build-number.outputs.build-number }}
+        git tag sde-infinity-${{ needs.build-number.outputs.build-number }}
+        git push origin sde-infinity-${{ needs.build-number.outputs.build-number }}
 
     # There is a delta. So create tarballs and release.
     - name: Create tarballs
@@ -222,6 +217,5 @@ jobs:
         files: |
           sde-*.tar.xz
         body_path: release-body.txt
-        tag_name: sde-singularity-${{ needs.build-number.outputs.build-number }}
+        tag_name: sde-infinity-${{ needs.build-number.outputs.build-number }}
         fail_on_unmatched_files: true
-        prerelease: true
