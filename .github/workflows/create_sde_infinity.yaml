@@ -73,8 +73,8 @@ jobs:
     - name: Install Python3
       run: |
         choco install python3 --version=3.13.3
-        C:\Python313\python.exe -m pip install --upgrade pip
-        C:\Python313\python.exe -m pip install requests
+        C:\python313\python.exe -m pip install --upgrade pip
+        C:\python313\python.exe -m pip install requests
 
     - name: Download loaders
       run: |
