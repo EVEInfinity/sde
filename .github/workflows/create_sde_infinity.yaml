@@ -84,7 +84,7 @@ jobs:
 
     - name: Execute loaders
       run: |
-        python scripts/execute_loaders.py
+        C:/Python27/python.exe scripts/execute_loaders.py
 
     - name: Publish artifact
       uses: actions/upload-artifact@v4
