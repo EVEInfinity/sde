@@ -78,7 +78,7 @@ jobs:
 
     - name: Download loaders
       run: |
-        C:\python313\python.exe scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} infinity
+        python313 scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} infinity
 
     - name: Execute loaders
       run: |
