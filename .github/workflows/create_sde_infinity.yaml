@@ -71,18 +71,19 @@ jobs:
         C:\Python27\python.exe -m pip install requests
 
     - name: Install Python3
-      run: |
-        choco install python3 --version=3.13.3
-        C:\python313\python.exe -m pip install --upgrade pip
-        C:\python313\python.exe -m pip install requests
+      uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.3'
+      run: python -m pip install requests
+
 
     - name: Download loaders
       run: |
-        C:\python313\python.exe scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} infinity
+        python scripts/download_loaders.py ${{ needs.build-number.outputs.build-number }} infinity
 
     - name: Execute loaders
       run: |
-        C:\Python27\python.exe scripts/execute_loaders.py
+        python scripts/execute_loaders.py
 
     - name: Publish artifact
       uses: actions/upload-artifact@v4
