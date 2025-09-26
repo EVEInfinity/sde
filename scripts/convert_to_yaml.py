@@ -23,6 +23,9 @@ def convert_value(value, column, options, strings):
     if type(value) == dict:
         # Allow dicts that are a string in different languages. But all other need column definitions.
         if "en" not in value.keys():
+            # FUCK NETEASE
+            if column.get("ignore-empty"):
+                return value
             raise Exception("Define nested objects with 'columns'")
 
         # Sometimes localization is empty (or resolved to an invalid key); delete those keys.
@@ -150,6 +153,10 @@ def main():
 
         yaml_data = {}
         for json_key, json_value in json_data.items():
+            if yaml_filename == 'types':
+                if len(json_value.get('descriptionID', { "en": "" })) == 0:
+                    # FUCK NETEASE
+                    print(f"Warning: missing 'descriptionID' in '{json_key}' in types.yaml")
             yaml_value = convert_object(json_value, yaml_config["columns"], options, strings)
             if yaml_value is None:
                 continue
